@@ -23,11 +23,15 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import random
 from django.db.models.query import QuerySet
+
+class QuerySetError(TypeError): pass
+class NumToSelectError(TypeError): pass
+
 def rand_subset(queryset, num_to_select):
   if type(queryset) is not QuerySet:
-    raise TypeError("<queryset> must be a django.db.models.query.QuerySet")
+    raise QuerySetError("<queryset> must be a django.db.models.query.QuerySet")
   if type(num_to_select) is not int:
-    raise TypeError("<num_to_select> must be an integer.\n Got a (%s :%s) instead.\n" % (num_to_select, type(num_to_select)))
+    raise NumToSelectError("<num_to_select> must be an integer.\n Got a (%s :%s) instead.\n" % (num_to_select, type(num_to_select)))
   num_to_select = max(num_to_select, 0)
   def rand_index(max_val): return int(random.random() * max_val)
 
