@@ -66,44 +66,22 @@ class TestRandSubset(unittest.TestCase, myAsserts):
       self.assertFail(asrt=rand_subset, queryset=self.not_a_queryset, num_to_select=n)
       self.assertRaises(excClass=NumToSelectError, callableObj=rand_subset, queryset=self.queryset, num_to_select=n)
 
-  #def test_return_type(self):
-    #r_ss = [
-      #rand_subset(queryset=self.queryset, num_to_select=self.num_to_select),
-      #rand_subset(queryset=self.queryset, num_to_select=self.zero),
-      #rand_subset(queryset=self.queryset, num_to_select=self.negative_num_to_select),
-      #rand_subset(queryset=self.queryset, num_to_select=self.too_high_num_to_select)
-    #]
-    #exprs = [(type(r_s) is QuerySet) for r_s in r_ss]
-    #for expr in exprs:
-      #self.assertTrue(expr)
-      ## Test the tests!
-      #self.assertFail(asrt=self.assertFalse, expr=expr)
+  def test_return_type(self):
+    r_ss = [rand_subset(queryset=self.queryset, num_to_select=n) for n in self.good_nums_to_select]
+    exprs = [(type(r_s) is QuerySet) for r_s in r_ss]
+    self.assertTrue(all(exprs))
 
-  #def test_return_size(self):
-    #r_s1 = rand_subset(queryset=self.queryset, num_to_select=self.num_to_select)
-    #r_s2 = rand_subset(queryset=self.queryset, num_to_select=self.negative_num_to_select)
-    #r_s3 = rand_subset(queryset=self.queryset, num_to_select=self.too_high_num_to_select)
-    #exprs = [
-        #(r_s1.count() == self.num_to_select),
-        #(r_s2.count() == 0),
-        #(r_s3.count() == self.queryset.count())
-    #]
-    #for expr in exprs:
-      #self.assertTrue(expr)
-      ## Test the test!
-      #self.assertFail(asrt=self.assertFalse, expr=expr)
-
-  #def test_no_duplicates(self):
-    #r_ss = [
-      #rand_subset(queryset=self.queryset, num_to_select=self.num_to_select),
-      #rand_subset(queryset=self.queryset, num_to_select=self.negative_num_to_select),
-      #rand_subset(queryset=self.queryset, num_to_select=self.too_high_num_to_select)
-    #]
-    #exprs = [(r_s.count() == len(set(r_s.values_list('pk', flat=True)))) for r_s in r_ss]
-    #for expr in exprs:
-      #self.assertTrue(expr)
-      ## Test the test!
-      #self.assertFail(asrt=self.assertFalse, expr=expr)
+  def test_return_size(self):
+    def rs(k): return rand_subset(queryset=self.queryset, num_to_select=k)
+    def expected_size(k): return max(0, min(k, self.queryset.count()))
+    exprs = [(rs(n).count() == expected_size(n)) for n in self.good_nums_to_select]
+    self.assertTrue(all(exprs))
+  
+  def test_no_duplicates(self):
+    def expected_size(rs): return len(set(rs.values_list('pk', flat=True)))
+    r_ss = [rand_subset(queryset=self.queryset, num_to_select=n) for n in self.good_nums_to_select]
+    exprs = [(r_s.count() == expected_size(r_s)) for r_s in r_ss]
+    self.assertTrue(all(exprs))
 
 if __name__ == '__main__':
   unittest.main()
